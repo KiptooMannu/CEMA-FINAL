@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import './_RegisterClientForm.scss';
 
-// Custom Toast Components
 const Toast = ({ message, type, onClose }) => (
   <div className={`toast ${type}`}>
     <span>{message}</span>
@@ -26,11 +25,13 @@ const ToastContainer = ({ toasts, removeToast }) => (
 
 const RegisterClientForm = ({ onClientRegistered }) => {
   const [newClient, setNewClient] = useState({
-    name: '',
-    age: '',
+    firstName: '',
+    lastName: '',
+    dateOfBirth: new Date().toISOString().split('T')[0],
     gender: '',
-    clientId: '',
-    dateOfBirth: '',
+    address: '',
+    phone: '',
+    email: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toasts, setToasts] = useState([]);
@@ -38,10 +39,11 @@ const RegisterClientForm = ({ onClientRegistered }) => {
   const addToast = (message, type = 'info') => {
     const id = Date.now();
     setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => removeToast(id), 3000);
+  };
 
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((toast) => toast.id !== id));
-    }, 3000);
+  const removeToast = (id) => {
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
   };
 
   const handleChange = (e) => {
@@ -54,37 +56,84 @@ const RegisterClientForm = ({ onClientRegistered }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!newClient.name.trim() || !newClient.clientId.trim()) {
-      addToast('Name and Client ID are required', 'error');
+    
+    // Trim all inputs first
+    const trimmedData = {
+      firstName: newClient.firstName.trim(),
+      lastName: newClient.lastName.trim(),
+      dateOfBirth: newClient.dateOfBirth,
+      gender: newClient.gender,
+      address: newClient.address.trim(),
+      phone: newClient.phone.trim(),
+      email: newClient.email.trim()
+    };
+
+    // Validate required fields
+    if (!trimmedData.firstName || !trimmedData.lastName) {
+      addToast('First name and last name are required', 'error');
+      return;
+    }
+
+    // Validate email format if provided
+    if (trimmedData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedData.email)) {
+      addToast('Please enter a valid email address', 'error');
       return;
     }
 
     setIsSubmitting(true);
+    
     try {
+      // Prepare payload with EXACT field names expected by backend
+   // In your handleSubmit function:
+   const payload = {
+    first_name: trimmedData.firstName, // lowercase to match DB
+    last_name: trimmedData.lastName,  // lowercase to match DB
+    dateOfBirth: trimmedData.dateOfBirth || null,
+    gender: trimmedData.gender || null,
+    address: trimmedData.address || null,
+    phone: trimmedData.phone || null,
+    email: trimmedData.email || null
+  };
+
+      console.log('Submitting payload:', payload); // Debug log
+
       const response = await fetch('http://localhost:3000/api/clients', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newClient),
+        headers: { 
+          'Content-Type': 'application/json',
+          // Add any other required headers here
+        },
+        body: JSON.stringify(payload),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        addToast('Client registered successfully!', 'success');
-        onClientRegistered(data.data);
-        setNewClient({
-          name: '',
-          age: '',
-          gender: '',
-          clientId: '',
-          dateOfBirth: '',
-        });
-      } else {
-        const errorData = await response.json();
-        addToast(errorData?.message || 'Failed to register client', 'error');
+      const responseData = await response.json();
+      
+      if (!response.ok) {
+        console.error('Backend error response:', responseData);
+        throw new Error(responseData.message || `Registration failed with status ${response.status}`);
       }
+
+      addToast('Client registered successfully!', 'success');
+      
+      // Callback with registered client data
+      if (onClientRegistered) {
+        onClientRegistered(responseData.data);
+      }
+      
+      // Reset form
+      setNewClient({
+        firstName: '',
+        lastName: '',
+        dateOfBirth: new Date().toISOString().split('T')[0],
+        gender: '',
+        address: '',
+        phone: '',
+        email: ''
+      });
+
     } catch (error) {
-      console.error('Error registering client:', error);
-      addToast('Network error occurred', 'error');
+      console.error('Registration error:', error);
+      addToast(error.message || 'Failed to register client. Please try again.', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -92,56 +141,54 @@ const RegisterClientForm = ({ onClientRegistered }) => {
 
   return (
     <div className="form-container">
-      <ToastContainer toasts={toasts} removeToast={(id) => setToasts((prev) => prev.filter((toast) => toast.id !== id))} />
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
       <div className="form-card">
         <h2 className="form-title">Register New Client</h2>
-        <form onSubmit={handleSubmit} className="client-form">
-          <div className="form-group">
-            <label htmlFor="name" className="form-label">Full Name*</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={newClient.name}
-              onChange={handleChange}
-              className="form-input"
-              placeholder="Enter client's full name"
-              required
-            />
-          </div>
-
+        <form onSubmit={handleSubmit} className="client-form" noValidate>
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="clientId" className="form-label">Client ID*</label>
+              <label htmlFor="firstName" className="form-label">First Name*</label>
               <input
                 type="text"
-                id="clientId"
-                name="clientId"
-                value={newClient.clientId}
+                id="firstName"
+                name="firstName"
+                value={newClient.firstName}
                 onChange={handleChange}
                 className="form-input"
-                placeholder="Unique client identifier"
+                placeholder="First name"
                 required
+                minLength={1}
               />
             </div>
-
             <div className="form-group">
-              <label htmlFor="age" className="form-label">Age</label>
+              <label htmlFor="lastName" className="form-label">Last Name*</label>
               <input
-                type="number"
-                id="age"
-                name="age"
-                value={newClient.age}
+                type="text"
+                id="lastName"
+                name="lastName"
+                value={newClient.lastName}
                 onChange={handleChange}
                 className="form-input"
-                placeholder="Age in years"
-                min="0"
-                max="120"
+                placeholder="Last name"
+                required
+                minLength={1}
               />
             </div>
           </div>
 
           <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="dateOfBirth" className="form-label">Date of Birth</label>
+              <input
+                type="date"
+                id="dateOfBirth"
+                name="dateOfBirth"
+                value={newClient.dateOfBirth}
+                onChange={handleChange}
+                className="form-input"
+                max={new Date().toISOString().split('T')[0]}
+              />
+            </div>
             <div className="form-group">
               <label htmlFor="gender" className="form-label">Gender</label>
               <select
@@ -158,23 +205,62 @@ const RegisterClientForm = ({ onClientRegistered }) => {
                 <option value="Prefer not to say">Prefer not to say</option>
               </select>
             </div>
+          </div>
 
+          <div className="form-row">
             <div className="form-group">
-              <label htmlFor="dateOfBirth" className="form-label">Date of Birth</label>
+              <label htmlFor="phone" className="form-label">Phone</label>
               <input
-                type="date"
-                id="dateOfBirth"
-                name="dateOfBirth"
-                value={newClient.dateOfBirth}
+                type="tel"
+                id="phone"
+                name="phone"
+                value={newClient.phone}
                 onChange={handleChange}
                 className="form-input"
-                max={new Date().toISOString().split('T')[0]}
+                placeholder="Phone number"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="email" className="form-label">Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={newClient.email}
+                onChange={handleChange}
+                className="form-input"
+                placeholder="Email address"
               />
             </div>
           </div>
 
-          <button type="submit" className="submit-button" disabled={isSubmitting}>
-            {isSubmitting ? 'Registering...' : 'Register Client'}
+          <div className="form-group">
+            <label htmlFor="address" className="form-label">Address</label>
+            <textarea
+              id="address"
+              name="address"
+              value={newClient.address}
+              onChange={handleChange}
+              className="form-input"
+              placeholder="Full address"
+              rows={3}
+            />
+          </div>
+
+          <button 
+            type="submit" 
+            className="submit-button" 
+            disabled={isSubmitting}
+            aria-busy={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <span className="spinner"></span>
+                Registering...
+              </>
+            ) : (
+              'Register Client'
+            )}
           </button>
         </form>
       </div>

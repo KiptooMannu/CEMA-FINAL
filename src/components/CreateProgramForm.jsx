@@ -1,70 +1,55 @@
-
 import React, { useState, useEffect } from 'react';
 import './_CreateProgramForm.scss';
 import 'react-toastify/dist/ReactToastify.css';
-
-// Custom Toast Component
-const Toast = ({ message, type, onClose }) => {
-  return (
-    <div className={`toast ${type}`}>
-      <span>{message}</span>
-      <button onClick={onClose} className="toast-close">
-        &times;
-      </button>
-    </div>
-  );
-};
-
-const ToastContainer = ({ toasts, removeToast }) => {
-  return (
-    <div className="toast-container">
-      {toasts.map((toast) => (
-        <Toast
-          key={toast.id}
-          message={toast.message}
-          type={toast.type}
-          onClose={() => removeToast(toast.id)}
-        />
-      ))}
-    </div>
-  );
-};
 
 const CreateProgramForm = ({ onProgramCreated }) => {
   const [newProgram, setNewProgram] = useState({
     name: '',
     description: '',
   });
+  const [programs, setPrograms] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toasts, setToasts] = useState([]);
 
-  // Function to add toast messages
+  // Fetch programs on component mount
+  useEffect(() => {
+    fetchPrograms();
+  }, []);
+
+  const fetchPrograms = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/programs');
+      if (response.ok) {
+        const data = await response.json();
+        setPrograms(data.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching programs:', error);
+      addToast('Failed to load programs', 'error');
+    }
+  };
+
   const addToast = (message, type = 'info') => {
     const id = Date.now();
     setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => removeToast(id), 3000);
   };
 
-  // Function to remove toast by ID
   const removeToast = (id) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   };
 
-  // Handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setNewProgram((prevProgram) => ({
-      ...prevProgram,
-      [name]: value,
-    }));
+    setNewProgram((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     if (!newProgram.name.trim()) {
-      addToast('Program name cannot be empty', 'error');
+      addToast('Program name is required', 'error');
       setIsSubmitting(false);
       return;
     }
@@ -72,88 +57,104 @@ const CreateProgramForm = ({ onProgramCreated }) => {
     try {
       const response = await fetch('http://localhost:3000/api/programs', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: newProgram.name,
-          description: newProgram.description,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newProgram),
       });
 
+      const data = await response.json();
+      
       if (response.ok) {
-        const data = await response.json();
         addToast('Program created successfully!', 'success');
-        onProgramCreated(data.data);
         setNewProgram({ name: '', description: '' });
+        fetchPrograms(); // Refresh the programs list
       } else {
-        const errorData = await response.json();
-        addToast(errorData?.message || 'Failed to create program', 'error');
+        throw new Error(data.message || 'Failed to create program');
       }
     } catch (err) {
-      addToast('Network error occurred', 'error');
-      console.error('Error creating program:', err);
+      addToast(err.message, 'error');
+      console.error('Error:', err);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // UseEffect to auto-remove toasts after 3 seconds
-  useEffect(() => {
-    if (toasts.length > 0) {
-      const timer = setTimeout(() => {
-        removeToast(toasts[0].id);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [toasts]);
-
   return (
-    <div className="form-container">
-      <ToastContainer toasts={toasts} removeToast={removeToast} />
-      
+    <div className="programs-container">
+      {/* Toast Notifications */}
+      <div className="toast-container">
+        {toasts.map((toast) => (
+          <div key={toast.id} className={`toast ${toast.type}`}>
+            <span>{toast.message}</span>
+            <button onClick={() => removeToast(toast.id)} className="toast-close">
+              &times;
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Create Program Form */}
       <div className="form-card">
-        <h2 className="form-title">Create Health Program</h2>
-        <form onSubmit={handleSubmit} className="program-form">
+        <h2>Create Health Program</h2>
+        <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="name" className="form-label">
-              Program Name
-            </label>
+            <label>Program Name*</label>
             <input
               type="text"
-              id="name"
               name="name"
               value={newProgram.name}
               onChange={handleChange}
-              className="form-input"
               placeholder="Enter program name"
               required
             />
           </div>
           
           <div className="form-group">
-            <label htmlFor="description" className="form-label">
-              Description
-            </label>
-            <input
-              type="text"
-              id="description"
+            <label>Description</label>
+            <textarea
               name="description"
               value={newProgram.description}
               onChange={handleChange}
-              className="form-input"
-              placeholder="Enter program description"
+              placeholder="Enter description"
+              rows={3}
             />
           </div>
           
-          <button 
-            type="submit" 
-            className="submit-button"
-            disabled={isSubmitting}
-          >
+          <button type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Creating...' : 'Create Program'}
           </button>
         </form>
+      </div>
+
+      {/* Programs Table */}
+      <div className="programs-table-container">
+        <h2>Available Programs</h2>
+        
+        {programs.length > 0 ? (
+          <table className="programs-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody>
+              {programs.map((program) => (
+                <tr key={program.id}>
+                  <td>{program.name}</td>
+                  <td>{program.description || '-'}</td>
+                  <td className={`status ${program.status}`}>
+                    {program.status}
+                  </td>
+                  <td>{new Date(program.createdAt).toLocaleDateString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p className="no-programs">No programs available yet</p>
+        )}
       </div>
     </div>
   );

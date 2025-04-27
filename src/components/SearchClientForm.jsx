@@ -1,67 +1,137 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './_SearchClientForm.scss';
 
-const SearchClientForm = ({ onClientSearched }) => {
-  const [searchClientId, setSearchClientId] = useState('');
-  const [status, setStatus] = useState('');
+const SearchClientForm = () => {
+  const [clients, setClients] = useState([]);
+  const [filteredClients, setFilteredClients] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setStatus('Searching...');
-    setError('');
-
-    if (!searchClientId.trim()) {
-      setStatus('Failed');
-      setError('Please enter a Client ID to search.');
-      return;
-    }
-
-    try {
-      const response = await fetch(`http://localhost:3000/api/clients/search?query=${searchClientId}`, {  // Changed to "query"
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          // Include authorization header if needed
-          // 'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-        },
-      });
-
-      if (response.ok) {
+  // Fetch all clients on component mount
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('http://localhost:3000/api/clients', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch clients');
+        }
+        
         const data = await response.json();
-        setStatus('Success');
-        onClientSearched(data.data); // Access the data property
-      } else {
-        const errorData = await response.json();
-        setStatus('Failed');
-        setError(errorData?.message || 'Client not found.');
-        onClientSearched(null);
+        setClients(data.data);
+        setFilteredClients(data.data);
+      } catch (err) {
+        setError(err.message);
+        console.error('Error fetching clients:', err);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      setStatus('Failed');
-      setError('Network error occurred.');
-      console.error('Error searching client:', err);
+    };
+
+    fetchClients();
+  }, []);
+
+  // Filter clients based on search term
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      setFilteredClients(clients);
+    } else {
+      const filtered = clients.filter(client => 
+        client.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        client.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        client.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        client.phone?.includes(searchTerm) ||
+        client.id.toString().includes(searchTerm)
+      );
+      setFilteredClients(filtered);
     }
-  };
+  }, [searchTerm, clients]);
+
+  if (isLoading) {
+    return (
+      <div className="client-search-container">
+        <div className="loading-spinner"></div>
+        <p>Loading clients...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="client-search-container">
+        <div className="error-message">{error}</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="search-client-form">
-      <h3>Search for Client</h3>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Client ID:
+    <div className="client-search-page">
+      <ToastContainer />
+      
+      <div className="search-header">
+        <h1>Client Management</h1>
+        <div className="search-controls">
           <input
             type="text"
-            value={searchClientId}
-            onChange={(e) => setSearchClientId(e.target.value)}
+            placeholder="Search clients by name, email, phone, or ID"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
           />
-        </label>
-        <button type="submit" disabled={status === 'Searching...'}>
-          {status === 'Searching...' ? 'Searching...' : 'Search Client'}
-        </button>
-        {status && <p>{status}</p>}
-        {error && <p className="error">{error}</p>}
-      </form>
+          <span className="search-icon">
+            <i className="fas fa-search"></i>
+          </span>
+        </div>
+      </div>
+
+      <div className="clients-container">
+        <div className="clients-header">
+          <h2>Registered Clients</h2>
+          <span className="client-count">{filteredClients.length} clients found</span>
+        </div>
+
+        {filteredClients.length > 0 ? (
+          <div className="clients-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredClients.map(client => (
+                  <tr key={client.id}>
+                    <td>{client.id}</td>
+                    <td>{client.first_name} {client.last_name}</td>
+                    <td>{client.email || '-'}</td>
+                    <td>{client.phone || '-'}</td>
+                    <td>
+                      <button className="view-btn">View</button>
+                      <button className="edit-btn">Edit</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="no-results">
+            <p>No clients found matching your search criteria.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

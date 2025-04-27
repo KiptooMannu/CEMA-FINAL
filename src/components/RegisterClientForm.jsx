@@ -48,11 +48,12 @@ const RegisterClientForm = ({ onClientRegistered }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setNewClient((prev) => ({
+    setNewClient(prev => ({
       ...prev,
-      [name]: value,
+      [name]: value
     }));
-  };
+   };
+   
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -151,7 +152,7 @@ const RegisterClientForm = ({ onClientRegistered }) => {
               <input
                 type="text"
                 id="firstName"
-                name="firstName"
+                name="first_name"
                 value={newClient.firstName}
                 onChange={handleChange}
                 className="form-input"
@@ -165,7 +166,7 @@ const RegisterClientForm = ({ onClientRegistered }) => {
               <input
                 type="text"
                 id="lastName"
-                name="lastName"
+                name="last_name"
                 value={newClient.lastName}
                 onChange={handleChange}
                 className="form-input"

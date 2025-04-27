@@ -1,48 +1,115 @@
-.enroll-client-form {
-    h3 {
-      color: #007bff;
-      margin-bottom: 15px;
-    }
+.enrollment-form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   
-    form {
+    h2 {
+      margin-top: 0;
+      color: #2c3e50;
+      text-align: center;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #eee;
+    }
+  }
+  
+  .enrollment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  
+    .form-group {
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      gap: 0.5rem;
   
       label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-        color: #555;
+        font-weight: 500;
+        color: #4a5568;
       }
   
-      input[type="text"],
-      select {
-        padding: 10px;
-        border: 1px solid #ccc;
+      select, textarea {
+        padding: 0.75rem;
+        border: 1px solid #e2e8f0;
         border-radius: 4px;
-        font-size: 16px;
+        font-size: 1rem;
+        transition: border-color 0.2s;
   
         &:focus {
           outline: none;
-          border-color: #007bff;
-          box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+          border-color: #4299e1;
+        }
+  
+        &.error {
+          border-color: #e53e3e;
+        }
+  
+        &:disabled {
+          background-color: #f7fafc;
+          cursor: not-allowed;
         }
       }
   
-      button[type="submit"] {
-        background-color: #007bff;
-        color: white;
-        padding: 12px 15px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 16px;
-        transition: background-color 0.3s ease;
+      textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
   
-        &:hover {
-          background-color: #0056b3;
-        }
+      .error-message {
+        color: #e53e3e;
+        font-size: 0.875rem;
+      }
+  
+      .info-message {
+        color: #718096;
+        font-size: 0.875rem;
+        font-style: italic;
       }
     }
+  }
+  
+  .submit-button {
+    background-color: #4299e1;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    align-self: flex-start;
+  
+    &:hover {
+      background-color: #3182ce;
+    }
+  
+    &:disabled {
+      background-color: #a0aec0;
+      cursor: not-allowed;
+    }
+  }
+  
+  .form-error {
+    color: #e53e3e;
+    padding: 0.75rem;
+    background-color: #fff5f5;
+    border-radius: 4px;
+    margin-top: 1rem;
+  }
+  
+  .loading {
+    text-align: center;
+    padding: 2rem;
+    color: #4a5568;
+  }
+  
+  .error {
+    color: #e53e3e;
+    padding: 1rem;
+    background-color: #fff5f5;
+    border-radius: 4px;
+    text-align: center;
   }

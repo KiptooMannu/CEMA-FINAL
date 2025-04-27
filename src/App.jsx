@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import CreateProgramForm from './components/CreateProgramForm';
 import RegisterClientForm from './components/RegisterClientForm';
-import EnrollClientForm from './components/EnrollClientForm';
+import EnrollmentPage from './components/EnrollClientForm';
 import SearchClientForm from './components/SearchClientForm';
 import ClientProfile from './components/ClientProfile';
 
@@ -38,7 +38,7 @@ const App = () => {
       <CreateProgramForm onProgramCreated={handleCreateProgram} />
       <p>Available Programs: {programs.join(', ')}</p>
       <RegisterClientForm onClientRegistered={handleRegisterClient} />
-      <EnrollClientForm clients={clients} programs={programs} onClientEnrolled={handleEnrollClient} />
+      <EnrollmentPage clients={clients} programs={programs} onClientEnrolled={EnrollmentPage} />
       <SearchClientForm onClientSearched={handleSearchClient} />
       <ClientProfile client={selectedClient} />
     </div>

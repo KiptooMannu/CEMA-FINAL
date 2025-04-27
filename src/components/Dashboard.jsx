@@ -7,8 +7,8 @@ const Dashboard = () => {
   const [totalEnrollments, setTotalEnrollments] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activePrograms, setActivePrograms] = useState(0); // Add state for active programs
-
+  const [activePrograms, setActivePrograms] = useState(0); // State for active programs
+  const [totalPrograms, setTotalPrograms] = useState(0);   // New state for total programs
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,7 +39,7 @@ const Dashboard = () => {
         const enrollmentsData = await enrollmentsResponse.json();
         setTotalEnrollments(enrollmentsData.data.length);
 
-        // Fetch active programs.
+        // Fetch programs
         const programsResponse = await fetch('https://cema-health-program.onrender.com/api/programs', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -50,12 +50,17 @@ const Dashboard = () => {
           throw new Error('Failed to fetch programs');
         }
         const programsData = await programsResponse.json();
-        // Check if programsData.data is an array before filtering
-        const activeCount = Array.isArray(programsData.data)
-          ? programsData.data.filter((program) => program.status === 'Active').length
-          : 0;
-        setActivePrograms(activeCount);
 
+        // Set total number of programs
+        if (Array.isArray(programsData.data)) {
+          setTotalPrograms(programsData.data.length);
+          // Count active programs
+          const activeCount = programsData.data.filter((program) => program.status === 'Active').length;
+          setActivePrograms(activeCount);
+        } else {
+          setTotalPrograms(0);
+          setActivePrograms(0);
+        }
 
       } catch (err) {
         setError(err.message);
@@ -102,6 +107,11 @@ const Dashboard = () => {
           <h3>Total Enrollments</h3>
           <p>{totalEnrollments}</p>
           <Link to="/enroll-client">New Enrollment</Link>
+        </div>
+        <div className="stat-card"> {/* New card for total programs */}
+          <h3>Total Programs</h3>
+          <p>{totalPrograms}</p>
+          <Link to="/create-program">View Programs</Link>
         </div>
       </div>
 

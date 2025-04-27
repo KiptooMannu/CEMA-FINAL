@@ -16,7 +16,7 @@ const Dashboard = () => {
       setError(null);
       try {
         // Fetch total clients
-        const clientsResponse = await fetch('http://localhost:3000/api/clients', {
+        const clientsResponse = await fetch('https://cema-health-program.onrender.com/api/clients', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -28,7 +28,7 @@ const Dashboard = () => {
         setTotalClients(clientsData.data.length);
 
         // Fetch total enrollments
-        const enrollmentsResponse = await fetch('http://localhost:3000/api/enrollments', {
+        const enrollmentsResponse = await fetch('https://cema-health-program.onrender.com/api/enrollments', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -40,7 +40,7 @@ const Dashboard = () => {
         setTotalEnrollments(enrollmentsData.data.length);
 
         // Fetch active programs.
-        const programsResponse = await fetch('http://localhost:3000/api/programs', {
+        const programsResponse = await fetch('https://cema-health-program.onrender.com/api/programs', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }

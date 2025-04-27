@@ -7,7 +7,6 @@ const Dashboard = () => {
   const [totalEnrollments, setTotalEnrollments] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activePrograms, setActivePrograms] = useState(0); // State for active programs
   const [totalPrograms, setTotalPrograms] = useState(0);   // New state for total programs
 
   useEffect(() => {

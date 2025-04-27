@@ -147,7 +147,7 @@ const ClientProfile = () => {
                     <th>Status</th>
                     <th>Enrolled Date</th>
                     <th>Completed Date</th>
-                    <th>Notes</th>
+                    <th>Doctors Notes</th>
                   </tr>
                 </thead>
                 <tbody>

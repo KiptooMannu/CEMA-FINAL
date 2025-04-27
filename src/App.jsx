@@ -74,7 +74,7 @@ const App = () => {
             <li><Link to="/create-program">Create Program</Link></li>
             <li><Link to="/register-client">Register Client</Link></li>
             <li><Link to="/enroll-client">Enroll Client</Link></li>
-            <li><Link to="/search-clients">Client Search</Link></li>
+            <li><Link to="/search-clients">Client Search <br></br>Profile View</Link></li>
           </ul>
         </nav>
 

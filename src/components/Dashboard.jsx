@@ -98,11 +98,7 @@ const Dashboard = () => {
           <p>{totalClients}</p>
           <Link to="/search-clients">View All</Link>
         </div>
-        <div className="stat-card">
-          <h3>Active Programs</h3>
-          <p>{activePrograms}</p>
-          <Link to="/create-program">Manage</Link>
-        </div>
+     
         <div className="stat-card">
           <h3>Total Enrollments</h3>
           <p>{totalEnrollments}</p>
@@ -111,7 +107,7 @@ const Dashboard = () => {
         <div className="stat-card"> {/* New card for total programs */}
           <h3>Total Programs</h3>
           <p>{totalPrograms}</p>
-          <Link to="/create-program">View Programs</Link>
+          <Link to="/create-program">Create Program</Link>
         </div>
       </div>
 

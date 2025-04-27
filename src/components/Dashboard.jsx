@@ -54,8 +54,8 @@ const Dashboard = () => {
         if (Array.isArray(programsData.data)) {
           setTotalPrograms(programsData.data.length);
           // Count active programs
-          const activeCount = programsData.data.filter((program) => program.status === 'Active').length;
-          setActivePrograms(activeCount);
+          // const activeCount = programsData.data.filter((program) => program.status === 'Active').length;
+          // setActivePrograms(activeCount);
         } else {
           setTotalPrograms(0);
           setActivePrograms(0);

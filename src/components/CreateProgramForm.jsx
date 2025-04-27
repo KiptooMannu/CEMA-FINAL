@@ -18,7 +18,7 @@ const CreateProgramForm = ({ onProgramCreated }) => {
 
   const fetchPrograms = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/programs');
+      const response = await fetch('https://cema-health-program.onrender.com/api/programs');
       if (response.ok) {
         const data = await response.json();
         setPrograms(data.data || []);
@@ -55,7 +55,7 @@ const CreateProgramForm = ({ onProgramCreated }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/api/programs', {
+      const response = await fetch('https://cema-health-program.onrender.com/api/programs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newProgram),

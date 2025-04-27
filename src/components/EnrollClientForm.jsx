@@ -26,7 +26,7 @@ const EnrollmentPage = () => {
         setIsLoading(true);
         
         // Fetch clients
-        const clientsResponse = await fetch('http://localhost:3000/api/clients', {
+        const clientsResponse = await fetch('https://cema-health-program.onrender.com/api/clients', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -39,7 +39,7 @@ const EnrollmentPage = () => {
         }
 
         // Fetch programs
-        const programsResponse = await fetch('http://localhost:3000/api/programs', {
+        const programsResponse = await fetch('https://cema-health-program.onrender.com/api/programs', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -89,7 +89,7 @@ const EnrollmentPage = () => {
     setIsSubmitting(true);
     
     try {
-      const response = await fetch('http://localhost:3000/api/enrollments', {
+      const response = await fetch('https://cema-health-program.onrender.com/api/enrollments', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

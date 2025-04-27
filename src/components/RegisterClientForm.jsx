@@ -98,7 +98,7 @@ const RegisterClientForm = ({ onClientRegistered }) => {
 
       console.log('Submitting payload:', payload); // Debug log
 
-      const response = await fetch('http://localhost:3000/api/clients', {
+      const response = await fetch('https://cema-health-program.onrender.com/api/clients', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

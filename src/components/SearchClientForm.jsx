@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './_SearchClientForm.scss';
@@ -9,13 +10,14 @@ const SearchClientForm = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   // Fetch all clients on component mount
   useEffect(() => {
     const fetchClients = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('http://localhost:3000/api/clients', {
+        const response = await fetch('https://cema-health-program.onrender.com/api/clients', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -54,6 +56,10 @@ const SearchClientForm = () => {
       setFilteredClients(filtered);
     }
   }, [searchTerm, clients]);
+
+  const handleViewProfile = (clientId) => {
+    navigate(`/clients/${clientId}/profile`);
+  };
 
   if (isLoading) {
     return (
@@ -118,8 +124,12 @@ const SearchClientForm = () => {
                     <td>{client.email || '-'}</td>
                     <td>{client.phone || '-'}</td>
                     <td>
-                      <button className="view-btn">View</button>
-                      <button className="edit-btn">Edit</button>
+                      <button 
+                        className="view-btn"
+                        onClick={() => handleViewProfile(client.id)}
+                      >
+                        View Profile
+                      </button>
                     </td>
                   </tr>
                 ))}

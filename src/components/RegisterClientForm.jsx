@@ -50,14 +50,14 @@ const RegisterClientForm = ({ onClientRegistered }) => {
     const { name, value } = e.target;
     setNewClient(prev => ({
       ...prev,
-      [name]: value
+      [name]: value // Use the input's name directly to update state
     }));
-   };
-   
+  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Trim all inputs first
     const trimmedData = {
       firstName: newClient.firstName.trim(),
@@ -82,25 +82,24 @@ const RegisterClientForm = ({ onClientRegistered }) => {
     }
 
     setIsSubmitting(true);
-    
+
     try {
       // Prepare payload with EXACT field names expected by backend
-   // In your handleSubmit function:
-   const payload = {
-    first_name: trimmedData.firstName, // lowercase to match DB
-    last_name: trimmedData.lastName,  // lowercase to match DB
-    dateOfBirth: trimmedData.dateOfBirth || null,
-    gender: trimmedData.gender || null,
-    address: trimmedData.address || null,
-    phone: trimmedData.phone || null,
-    email: trimmedData.email || null
-  };
+      const payload = {
+        first_name: trimmedData.firstName, // lowercase to match DB
+        last_name: trimmedData.lastName,   // lowercase to match DB
+        dateOfBirth: trimmedData.dateOfBirth || null,
+        gender: trimmedData.gender || null,
+        address: trimmedData.address || null,
+        phone: trimmedData.phone || null,
+        email: trimmedData.email || null
+      };
 
       console.log('Submitting payload:', payload); // Debug log
 
       const response = await fetch('https://cema-health-program.onrender.com/api/clients', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           // Add any other required headers here
         },
@@ -108,19 +107,19 @@ const RegisterClientForm = ({ onClientRegistered }) => {
       });
 
       const responseData = await response.json();
-      
+
       if (!response.ok) {
         console.error('Backend error response:', responseData);
         throw new Error(responseData.message || `Registration failed with status ${response.status}`);
       }
 
       addToast('Client registered successfully!', 'success');
-      
+
       // Callback with registered client data
       if (onClientRegistered) {
         onClientRegistered(responseData.data);
       }
-      
+
       // Reset form
       setNewClient({
         firstName: '',
@@ -152,7 +151,7 @@ const RegisterClientForm = ({ onClientRegistered }) => {
               <input
                 type="text"
                 id="firstName"
-                name="first_name"
+                name="firstName" // Changed to match state key
                 value={newClient.firstName}
                 onChange={handleChange}
                 className="form-input"
@@ -166,7 +165,7 @@ const RegisterClientForm = ({ onClientRegistered }) => {
               <input
                 type="text"
                 id="lastName"
-                name="last_name"
+                name="lastName" // Changed to match state key
                 value={newClient.lastName}
                 onChange={handleChange}
                 className="form-input"
@@ -248,9 +247,9 @@ const RegisterClientForm = ({ onClientRegistered }) => {
             />
           </div>
 
-          <button 
-            type="submit" 
-            className="submit-button" 
+          <button
+            type="submit"
+            className="submit-button"
             disabled={isSubmitting}
             aria-busy={isSubmitting}
           >
